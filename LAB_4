@@ -1,0 +1,81 @@
+import pandas as pd
+import numpy as np
+from scipy import stats
+
+# ----------------------------
+# T-TEST (Sample size < 30, σ unknown)
+# ----------------------------
+
+# Load t-test data
+t_data = pd.read_csv("t_test_data.csv")
+
+# Hypothesized population mean
+mu = 50000
+
+# Sample statistics
+sample_mean = t_data["Salary"].mean()
+sample_std = t_data["Salary"].std(ddof=1)
+n = len(t_data)
+
+print("T-Test Data Mean:", sample_mean)
+print("Sample Size:", n)
+
+# Two-tailed t-test: H0: μ = 50000 vs H1: μ ≠ 50000
+t_statistic, p_value_two_tailed = stats.ttest_1samp(t_data["Salary"], mu)
+print("\nT-Test (Two-tailed):")
+print("t-statistic:", t_statistic)
+print("p-value:", p_value_two_tailed)
+if p_value_two_tailed < 0.05:
+    print("Reject H0: Average salary differs from 50000")
+else:
+    print("Fail to reject H0: No significant difference")
+
+# One-tailed t-test: H0: μ ≥ 50000 vs H1: μ < 50000
+t_statistic, p_value = stats.ttest_1samp(t_data["Salary"], mu)
+p_value_one_tailed = p_value / 2  # one-tailed
+print("\nT-Test (One-tailed, less than 50000):")
+print("t-statistic:", t_statistic)
+print("p-value:", p_value_one_tailed)
+if (t_statistic < 0) and (p_value_one_tailed < 0.05):
+    print("Reject H0: Average salary is less than 50000")
+else:
+    print("Fail to reject H0")
+
+# ----------------------------
+# Z-TEST (Sample size ≥ 30, σ known)
+# ----------------------------
+
+# Load z-test data
+z_data = pd.read_csv("z_test_data.csv")
+
+# Known population std deviation
+sigma = 2500
+n = len(z_data)
+sample_mean = z_data["Salary"].mean()
+mu = 50000
+
+print("\nZ-Test Data Mean:", sample_mean)
+print("Sample Size:", n)
+
+# Calculate Z statistic
+z_statistic = (sample_mean - mu) / (sigma / np.sqrt(n))
+
+# Two-tailed z-test
+p_value_two_tailed = 2 * (1 - stats.norm.cdf(abs(z_statistic)))
+print("\nZ-Test (Two-tailed):")
+print("z-statistic:", z_statistic)
+print("p-value:", p_value_two_tailed)
+if p_value_two_tailed < 0.05:
+    print("Reject H0: Average salary differs from 50000")
+else:
+    print("Fail to reject H0")
+
+# One-tailed z-test: H0: μ ≤ 50000 vs H1: μ > 50000
+p_value_one_tailed = 1 - stats.norm.cdf(z_statistic)
+print("\nZ-Test (One-tailed, greater than 50000):")
+print("z-statistic:", z_statistic)
+print("p-value:", p_value_one_tailed)
+if (z_statistic > 0) and (p_value_one_tailed < 0.05):
+    print("Reject H0: Average salary is greater than 50000")
+else:
+    print("Fail to reject H0")
